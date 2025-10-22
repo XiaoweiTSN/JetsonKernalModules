@@ -1,5 +1,7 @@
 # Jetson Orin 自定义内核模块安装说明
 
+> **注意**：本仓库的 `jetson-headless-display` 分支包含 Jetson 无头显示配置功能（解决 RustDesk/VNC 无显示器问题），与主分支内核模块功能无关，[点击此处查看该分支](https://github.com/XiaoweiTSN/JetsonKernalModules/tree/jetson-headless-display)。
+
 本脚本用于在 **Jetson Orin + JetPack 6（内核版本 5.15.148-tegra）** 系统中安装 7 个自定义编译的内核模块。
 
 - **6 个模块**增强了对 **Intel® RealSense™ 相机** 的支持；
