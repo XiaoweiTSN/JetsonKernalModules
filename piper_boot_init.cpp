@@ -130,6 +130,9 @@ public:
         std::chrono::milliseconds status_poll_interval{50};
         int home_retry_count{2};
         uint8_t motion_speed_percent{30};
+        // 目标关节位置 (单位: 毫度 mdeg，即 0.001度)
+        // 6个关节: {J1, J2, J3, J4, J5, J6}
+        std::vector<int32_t> target_joints{0, 0, 0, 0, 0, 0};
     };
 
     explicit PiperInitializer(const Config &config) : config_(config)
@@ -362,8 +365,7 @@ private:
 
             std::this_thread::sleep_for(100ms);
 
-            std::vector<int32_t> zero_joints = {0, 0, 0, 0, 0, 0};
-            auto move_result = piper_->move_joint(zero_joints);
+            auto move_result = piper_->move_joint(config_.target_joints);
 
             if (!move_result.ok)
             {
@@ -409,19 +411,20 @@ private:
                     return InitError::ARM_ERROR;
                 }
 
-                bool all_at_zero = true;
-                for (size_t i = 0; i < arm_status->joints.position_mdeg.size(); i++)
+                bool all_at_target = true;
+                for (size_t i = 0; i < arm_status->joints.position_mdeg.size() && i < config_.target_joints.size(); i++)
                 {
-                    if (std::abs(arm_status->joints.position_mdeg[i]) > kPositionTolerance)
+                    int32_t diff = std::abs(arm_status->joints.position_mdeg[i] - config_.target_joints[i]);
+                    if (diff > kPositionTolerance)
                     {
-                        all_at_zero = false;
+                        all_at_target = false;
                         break;
                     }
                 }
 
-                if (all_at_zero)
+                if (all_at_target)
                 {
-                    Logger::info("Homing done");
+                    Logger::info("Target position reached");
                     return InitError::OK;
                 }
             }
@@ -429,7 +432,7 @@ private:
             std::this_thread::sleep_for(config_.status_poll_interval);
         }
 
-        Logger::error("Homing timeout");
+        Logger::error("Move to target timeout");
         return InitError::HOME_TIMEOUT;
     }
 };
@@ -441,6 +444,10 @@ int main()
     PiperInitializer::Config config;
     // 可以在这里硬编码配置，或通过环境变量读取
     // config.can_interface = "can0";
+    
+    // 设置目标关节位置 (单位: 毫度 mdeg)
+    // 例如: 第一个关节转到 45度 = 45000 mdeg
+    config.target_joints = {-90000, 0, 0, 0, 0, 0};
 
     PiperInitializer initializer(config);
     InitError result = initializer.run();
