@@ -1,11 +1,10 @@
 # Jetson Orin 自定义内核模块安装包
 
-> **本仓库包含三个独立分支，分别解决不同问题：**
+> **本仓库包含两个分支：**
 >
 > | 分支 | 功能 | 链接 |
 > |------|------|------|
 > | **`main`**（当前） | 内核模块安装（RealSense、CAN、CH341 串口） | — |
-> | **`jetson-headless-display`** | Jetson 无头显示配置（解决 RustDesk/VNC 无显示器黑屏问题） | [查看分支](https://github.com/XiaoweiTSN/JetsonKernalModules/tree/jetson-headless-display) |
 > | **`piper-auto-start`** | Piper 机械臂开机自动上电回零（systemd 服务） | [查看分支](https://github.com/XiaoweiTSN/JetsonKernalModules/tree/piper-auto-start) |
 
 ---
@@ -136,17 +135,6 @@ install-modules/
 ---
 
 ## 其他分支说明
-
-### `jetson-headless-display` — 无头显示配置
-
-解决 Jetson 在 **没有接入物理显示器** 时 RustDesk、VNC 等远程桌面工具无法正常工作的问题。通过伪造 EDID 文件让 Xorg 和 GPU 驱动在无显示器状态下正常初始化图形输出（2560x1440@100Hz）。
-
-**适用场景：** 需要远程桌面访问的无头 Jetson 部署环境。
-
-```bash
-git checkout jetson-headless-display
-# 详见该分支 README
-```
 
 ### `piper-auto-start` — Piper 机械臂开机自启动
 
