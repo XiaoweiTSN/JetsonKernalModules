@@ -11,12 +11,15 @@
 
 ## 概述
 
-本脚本用于在 **Jetson Orin + JetPack 6** 系统中安装自定义编译的内核模块。支持两个内核版本的自动检测与安装：
+本脚本用于在 **Jetson Orin + JetPack 6** 系统中安装自定义编译的内核模块。支持以下内核版本的自动检测与安装：
 
 - **`5.15.148-tegra`** — JetPack 6.0 ~ 6.1 默认内核
-- **`5.15.185-tegra`** — JetPack 6.2（R36.5.0）默认内核
+- **`5.15.148-rt-tegra`** — `5.15.148-tegra` 对应的实时内核版本
+- **`5.15.185(-tegra)`** — JetPack 6.x 的 `5.15.185` 内核
 
-共包含 **8 个内核模块**，分为三组：
+如果系统同时安装了 `5.15.148-tegra` 和 `5.15.148-rt-tegra` 两套内核，脚本会一次性给两套 `/lib/modules/` 都安装对应模块，并分别执行 `depmod`。模块加载只针对当前正在运行的内核执行。
+
+`5.15.148-tegra`、`5.15.148-rt-tegra` 和 `5.15.185` 目录均包含 **8 个内核模块**。
 
 ### RealSense 相机支持（6 个模块）
 
@@ -49,7 +52,7 @@ JetPack 6 系统已内置 `usbserial`、`cp210x`、`ftdi_sio`、`cdc-acm` 等常
 
 - Jetson Orin 系列（Orin NX / Orin Nano / AGX Orin）
 - JetPack 6.x 系统
-- 内核版本为 `5.15.148-tegra` 或 `5.15.185-tegra`
+- 内核版本为 `5.15.148-tegra`、`5.15.148-rt-tegra` 或 `5.15.185(-tegra)`
 - 执行脚本时需具有 `sudo` 权限
 
 ---
@@ -79,12 +82,13 @@ sudo ./install-jetson-modules.sh
 脚本将自动执行以下步骤：
 
 1. 通过 `uname -r` 检测当前内核版本；
-2. 自动选择对应版本的模块目录（`5.15.148-tegra/` 或 `5.15.185/`）；
-3. 检查所有模块文件完整性；
-4. 将模块拷贝至系统目录 `/lib/modules/<kernel>/kernel/...`；
-5. 运行 `depmod` 更新模块依赖关系；
-6. 按正确的依赖顺序加载所有模块；
-7. 输出安装结果摘要。
+2. 自动选择对应版本的模块目录（`5.15.148-tegra/`、`5.15.148-rt-tegra/` 或 `5.15.185/`）；
+3. 如果系统同时存在 `5.15.148-tegra` 和 `5.15.148-rt-tegra`，同时安装两套模块；
+4. 检查所有模块文件完整性；
+5. 将模块拷贝至系统目录 `/lib/modules/<kernel>/kernel/...`；
+6. 对每套已安装模块运行 `depmod` 更新模块依赖关系；
+7. 按正确的依赖顺序加载当前运行内核的模块；
+8. 输出安装结果摘要。
 
 ### 3. 重启并验证
 
@@ -118,7 +122,7 @@ dmesg | tail -20
 ```
 install-modules/
 ├── install-jetson-modules.sh    # 自动检测安装脚本
-├── 5.15.148-tegra/              # JetPack 6.0~6.1 内核模块
+├── 5.15.148-tegra/              # JetPack 6.0~6.1 普通内核模块
 │   ├── uvcvideo.ko
 │   ├── hid-sensor-accel-3d.ko
 │   ├── hid-sensor-gyro-3d.ko
@@ -127,10 +131,21 @@ install-modules/
 │   ├── hid-sensor-trigger.ko
 │   ├── gs_usb.ko
 │   └── ch341.ko
-└── 5.15.185/                    # JetPack 6.2 (R36.5.0) 内核模块
+├── 5.15.148-rt-tegra/           # 5.15.148 RT 内核模块
+│   ├── uvcvideo.ko
+│   ├── hid-sensor-accel-3d.ko
+│   ├── hid-sensor-gyro-3d.ko
+│   ├── hid-sensor-iio-common.ko
+│   ├── hid-sensor-hub.ko
+│   ├── hid-sensor-trigger.ko
+│   ├── gs_usb.ko
+│   └── ch341.ko
+└── 5.15.185/                    # JetPack 6.2 (R36.5.0) 普通内核模块
     ├── (同上，共 8 个模块)
     └── ...
 ```
+
+仓库根目录还保留了 `rt-extra-modules-5.15.148-rt-tegra.tar.gz`，里面是可能用到的 RT 备用模块。当前安装脚本只使用 `install-modules/5.15.148-rt-tegra/` 里的 8 个常用模块，不会自动解压或安装这个备用压缩包；如果以后需要补充其他 RT 模块，可以手动解压后从中取用。
 
 ---
 
