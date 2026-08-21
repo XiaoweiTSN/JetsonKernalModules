@@ -15,12 +15,12 @@
 
 - **`5.15.148-tegra`** — JetPack 6.0 ~ 6.1 默认内核
 - **`5.15.148-rt-tegra`** — `5.15.148-tegra` 对应的实时内核版本
-- **`5.15.185(-tegra)`** — JetPack 6.x 的 `5.15.185` 内核
+- **`5.15.185-tegra`** — JetPack 6.x 的 `5.15.185` 内核
 - **`5.15.199-tegra`** — Jetson Linux R36.5.2 的普通内核
 
 如果系统同时安装了 `5.15.148-tegra` 和 `5.15.148-rt-tegra` 两套内核，脚本会一次性给两套 `/lib/modules/` 都安装对应模块，并分别执行 `depmod`。模块加载只针对当前正在运行的内核执行。
 
-`5.15.148-tegra`、`5.15.148-rt-tegra`、`5.15.185` 和 `5.15.199` 目录均包含 **8 个内核模块**。
+`5.15.148-tegra`、`5.15.148-rt-tegra`、`5.15.185-tegra` 和 `5.15.199-tegra` 目录均包含 **8 个内核模块**。
 
 ### RealSense 相机支持（6 个模块）
 
@@ -53,7 +53,7 @@ JetPack 6 系统已内置 `usbserial`、`cp210x`、`ftdi_sio`、`cdc-acm` 等常
 
 - Jetson Orin 系列（Orin NX / Orin Nano / AGX Orin）
 - JetPack 6.x 系统
-- 内核版本为 `5.15.148-tegra`、`5.15.148-rt-tegra`、`5.15.185(-tegra)` 或 `5.15.199-tegra`
+- 内核版本为 `5.15.148-tegra`、`5.15.148-rt-tegra`、`5.15.185-tegra` 或 `5.15.199-tegra`
 - 执行脚本时需具有 `sudo` 权限
 
 ---
@@ -83,7 +83,7 @@ sudo ./install-jetson-modules.sh
 脚本将自动执行以下步骤：
 
 1. 通过 `uname -r` 检测当前内核版本；
-2. 自动选择对应版本的模块目录（`5.15.148-tegra/`、`5.15.148-rt-tegra/`、`5.15.185/` 或 `5.15.199/`）；
+2. 自动选择对应版本的模块目录（`5.15.148-tegra/`、`5.15.148-rt-tegra/`、`5.15.185-tegra/` 或 `5.15.199-tegra/`）；
 3. 如果系统同时存在 `5.15.148-tegra` 和 `5.15.148-rt-tegra`，同时安装两套模块；
 4. 检查所有模块文件完整性；
 5. 将模块拷贝至系统目录 `/lib/modules/<kernel>/kernel/...`；
@@ -141,15 +141,17 @@ install-modules/
 │   ├── hid-sensor-trigger.ko
 │   ├── gs_usb.ko
 │   └── ch341.ko
-├── 5.15.185/                    # JetPack 6.2 (R36.5.0) 普通内核模块
+├── 5.15.185-tegra/              # JetPack 6.2 (R36.5.0) 普通内核模块
 │   ├── (同上，共 8 个模块)
 │   └── ...
-└── 5.15.199/                    # Jetson Linux R36.5.2 普通内核模块
+└── 5.15.199-tegra/             # Jetson Linux R36.5.2 普通内核模块
     ├── (同上，共 8 个模块)
     └── ...
 ```
 
 仓库根目录还保留了 `rt-extra-modules-5.15.148-rt-tegra.tar.gz`，里面是可能用到的 RT 备用模块。当前安装脚本只使用 `install-modules/5.15.148-rt-tegra/` 里的 8 个常用模块，不会自动解压或安装这个备用压缩包；如果以后需要补充其他 RT 模块，可以手动解压后从中取用。
+
+> 说明：`install-modules/` 下的目录是脚本直接安装时读取的“平铺模块目录”；而 `extra-modules-5.15.185-tegra/`、`extra-modules-5.15.199-tegra.tar.gz`、`rt-extra-modules-5.15.148-rt-tegra.tar.gz` 这类文件则是按 rootfs / `lib/modules/<kernel>/...` 结构打包的额外模块包，适合做补充分发和归档，不是安装脚本的直接输入目录。`5.15.185-tegra` 的 extra 目录目前用于存放对应内核版本的补充模块树。
 
 ---
 
