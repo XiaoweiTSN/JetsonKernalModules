@@ -13,10 +13,10 @@
 
 本脚本用于在 **Jetson Orin + JetPack 6** 系统中安装自定义编译的内核模块。支持以下内核版本的自动检测与安装：
 
-- **`5.15.148-tegra`** — JetPack 6.0 ~ 6.1 默认内核
+- **`5.15.148-tegra`** — JetPack 6.1 的 Linux R36.4.3 普通内核
 - **`5.15.148-rt-tegra`** — `5.15.148-tegra` 对应的实时内核版本
-- **`5.15.185-tegra`** — JetPack 6.x 的 `5.15.185` 内核
-- **`5.15.199-tegra`** — Jetson Linux R36.5.2 的普通内核
+- **`5.15.185-tegra`** — JetPack 6.2.2 的 Linux R36.5.0 普通内核
+- **`5.15.199-tegra`** — JetPack 6.2.3 的 Linux R36.5.2 普通内核
 
 如果系统同时安装了 `5.15.148-tegra` 和 `5.15.148-rt-tegra` 两套内核，脚本会一次性给两套 `/lib/modules/` 都安装对应模块，并分别执行 `depmod`。模块加载只针对当前正在运行的内核执行。
 
@@ -123,7 +123,7 @@ dmesg | tail -20
 ```
 install-modules/
 ├── install-jetson-modules.sh    # 自动检测安装脚本
-├── 5.15.148-tegra/              # JetPack 6.0~6.1 普通内核模块
+├── 5.15.148-tegra/              # JetPack 6.1 的 Linux R36.4.3 普通内核模块
 │   ├── uvcvideo.ko
 │   ├── hid-sensor-accel-3d.ko
 │   ├── hid-sensor-gyro-3d.ko
@@ -141,10 +141,10 @@ install-modules/
 │   ├── hid-sensor-trigger.ko
 │   ├── gs_usb.ko
 │   └── ch341.ko
-├── 5.15.185-tegra/              # JetPack 6.2 (R36.5.0) 普通内核模块
+├── 5.15.185-tegra/              # JetPack 6.2.2 的 Linux R36.5.0 普通内核模块
 │   ├── (同上，共 8 个模块)
 │   └── ...
-└── 5.15.199-tegra/             # Jetson Linux R36.5.2 普通内核模块
+└── 5.15.199-tegra/             # JetPack 6.2.3 的 Linux R36.5.2 普通内核模块
     ├── (同上，共 8 个模块)
     └── ...
 ```
